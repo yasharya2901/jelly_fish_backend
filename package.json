@@ -1,0 +1,28 @@
+{
+  "name": "jelly_fish_backend",
+  "version": "1.0.0",
+  "description": "This is the backend file for the jelly fish application.",
+  "homepage": "https://github.com/yasharya2901/jelly_fish_backend#readme",
+  "bugs": {
+    "url": "https://github.com/yasharya2901/jelly_fish_backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yasharya2901/jelly_fish_backend.git"
+  },
+  "license": "MIT",
+  "author": "Yash Arya",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "tsx src/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
