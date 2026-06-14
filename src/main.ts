@@ -1,32 +1,29 @@
 import Fastify from 'fastify';
-import {logger} from './utils/logger.js';
+import {createLogger} from './utils/logger.js';
+import connectWithDb from './utils/db.js';
+import { initializeEnvironmentVariables } from './utils/env.js';
 
 const PORT: number = Number(process.env.PORT) || 8000;
 const HOST: string = process.env.HOST ?? "0.0.0.0";
 
-const mainLogger = logger.child({
-    module: "main"
-})
+const logger = createLogger(import.meta.url);
 
 const fastify = Fastify({
-    loggerInstance: mainLogger
-})
-
-fastify.get("/", (req, res) => {
-    res.send({message: "Hello TCP user"})
-})
-
+    loggerInstance: logger
+});
 
 
 async function startServer() {
-    mainLogger.info("Server Starting...")
+    logger.info("Server Starting...")
     try {
-        fastify.listen({
+        await initializeEnvironmentVariables();
+        await connectWithDb();
+        await fastify.listen({
             port: PORT,
             host: HOST
         })
     } catch (error) {
-        fastify.log.error(error)
+        logger.error(error)
         process.exit(1)
     }
 }

@@ -1,9 +1,10 @@
 import pino from "pino";
-
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const isDevelopment: boolean = process.env.NODE_ENV != "production";
 
-export const logger = pino({
+const log = pino({
     level: process.env.LOG_LEVEL ?? "info",
     ...(isDevelopment && {
         transport: {
@@ -17,3 +18,14 @@ export const logger = pino({
         }
     })
 });
+
+export function createLogger(fileUrl: string) {
+    const filePath = fileURLToPath(fileUrl);
+    const modulePath = path
+        .relative(process.cwd(), filePath)
+        .replace(/\\/g, "/");
+
+    return log.child({
+        module: `${modulePath}`
+    });
+}
