@@ -32,8 +32,11 @@ class AuthService {
             otp: regToken.otp
         });
 
-        // send the email
-        await emailService.sendEmail(email, "Verify Your Account", otpHtmlTemplate);
+        // send the email asynchronously so we don't block the response
+        emailService.sendEmail(email, "Verify Your Account", otpHtmlTemplate).catch((err) => {
+            // TODO: Log the error to the registration token for further evaluation
+            console.error("Failed to send OTP email:", err);
+        });
 
         return regToken._id;
     }
