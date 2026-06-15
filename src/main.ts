@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import {createLogger} from './utils/logger.js';
 import connectWithDb from './utils/db.js';
 import { initializeEnvironmentVariables } from './utils/env.js';
+import authRoutes from './routes/auth.route.js';
 
 const PORT: number = Number(process.env.PORT) || 8000;
 const HOST: string = process.env.HOST ?? "0.0.0.0";
@@ -12,9 +13,10 @@ const fastify = Fastify({
     loggerInstance: logger
 });
 
+fastify.register(authRoutes, { prefix: '/api/v0/auth' });
 
 async function startServer() {
-    logger.info("Server Starting...")
+    logger.info("Server Starting...");
     try {
         await initializeEnvironmentVariables();
         await connectWithDb();

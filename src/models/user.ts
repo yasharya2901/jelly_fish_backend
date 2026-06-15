@@ -50,36 +50,10 @@ const userSchema = new mongoose.Schema({
     }
 }, {
     timestamps: true,
-    
-    methods: {
-        isSuspended() {
-            return this.suspended;
-        },
-
-        isEmailVerified() {
-            return this.emailVerified;
-        },
-
-        isPhoneVerified() {
-            return this.phoneVerified;
-        },
-
-        getCurrentInviteQuota() {
-            return this.maxInviteQuota;
-        },
-
-        getAvatarUrl() {
-            return this.avatarUrl;
-        },
-
-        async findReferredUsers() {
-            return this.model(DBModel.User).find({ referredByUserId: this._id });
-        }
-    },
 
     statics: {
         findByEmail(email: string) {
-            return this.findOne({email});
+            return this.findOne({emailId: email});
         },
 
         findByUsername(username: string) {
@@ -99,7 +73,5 @@ const userSchema = new mongoose.Schema({
 export type User = mongoose.InferSchemaType<typeof userSchema>
 
 export const UserModel = mongoose.model(DBModel.User, userSchema);
-
-
 
 

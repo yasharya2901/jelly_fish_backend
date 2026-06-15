@@ -6,7 +6,14 @@ export async function initializeEnvironmentVariables() {
 
     const MONGO_URI = process.env.MONGO_URI;
     if (!MONGO_URI) {
-        throw new Error("MONGO_URI is required for the starting the application.")
+        throw new Error("MONGO_URI is required for the starting the application.");
+    }
+
+    const EMAIL_USER = process.env.EMAIL_USER;
+    const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+
+    if (!EMAIL_USER || !EMAIL_PASSWORD) {
+        throw new Error("EMAIL_USER or EMAIL_PASSWORD is missing.");
     }
     
 }
