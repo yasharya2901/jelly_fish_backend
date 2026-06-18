@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DBModel } from "../common/constants.js";
+import { DBModel } from "../../config/constants.js";
 
 const friendRequestSchema = new mongoose.Schema({
     senderUserId: {

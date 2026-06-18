@@ -1,6 +1,125 @@
-<html>
-<body>
-    <h1>Your OTP</h1>
-    <p><%= otp %></p>
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="supported-color-schemes" content="dark">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;800;900&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+
+<style>
+  body { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; margin: 0; padding: 0; }
+  
+  /* Force dark mode clients to respect our locked colors */
+  @media (prefers-color-scheme: dark) {
+    .locked-yellow {
+      background-color: #FFDA0A !important;
+      background-image: linear-gradient(#FFDA0A, #FFDA0A) !important;
+    }
+    .locked-black {
+      color: #000000 !important;
+      -webkit-text-fill-color: #000000 !important;
+    }
+  }
+  /* Fix for Outlook.com dark mode */
+  [data-ogsc] .locked-yellow {
+      background-color: #FFDA0A !important;
+      background-image: linear-gradient(#FFDA0A, #FFDA0A) !important;
+  }
+  [data-ogsc] .locked-black {
+      color: #000000 !important;
+      -webkit-text-fill-color: #000000 !important;
+  }
+</style>
+</head>
+<body style="background-color: #16140E; color: #FFFFFF; font-family: 'Archivo', Helvetica, Arial, sans-serif; margin: 0; padding: 40px 20px; -webkit-font-smoothing: antialiased;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #16140E;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 400px; width: 100%; margin: 0 auto; text-align: left;">
+          
+          <tr>
+            <td style="padding-bottom: 40px;">
+              <table cellpadding="0" cellspacing="0" border="0" style="background-color: #000000; border-radius: 14px 9px 16px 8px;">
+                <tr>
+                  <td style="padding-top: 3px; padding-left: 3px; padding-right: 7px; padding-bottom: 7px;">
+                    <table class="locked-yellow" cellpadding="0" cellspacing="0" border="0" style="background-color: #FFDA0A; background-image: linear-gradient(#FFDA0A, #FFDA0A); border-radius: 14px 9px 16px 8px;">
+                      <tr>
+                        <td style="padding: 6px 12px; font-family: 'Archivo', Helvetica, Arial, sans-serif; font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: -0.5px;">
+                          <span class="locked-black" style="color: #000000; -webkit-text-fill-color: #000000;">JELLYFISH</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <tr>
+            <td>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000; border-radius: 8px 16px 9px 14px;">
+                <tr>
+                  <td style="padding-top: 3px; padding-left: 3px; padding-right: 8px; padding-bottom: 8px;">
+                    
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #22201A; border-radius: 8px 16px 9px 14px;">
+                      <tr>
+                        <td style="padding: 32px 24px;">
+                          
+                          <h1 style="font-family: 'Archivo', Helvetica, Arial, sans-serif; font-weight: 900; font-size: 28px; text-transform: uppercase; margin: 0 0 8px 0; letter-spacing: -0.5px; color: #FFFFFF;">
+                            YOUR CODE.
+                          </h1>
+                          
+                          <p style="font-family: 'Archivo', Helvetica, Arial, sans-serif; font-size: 16px; margin: 0 0 32px 0; color: #D4D4D4;">
+                            Verifying <strong style="color: #FFFFFF; font-weight: 800;"><%= email %></strong>.
+                          </p>
+                          
+                          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000; border-radius: 14px 9px 16px 8px;">
+                            <tr>
+                              <td style="padding-top: 3px; padding-left: 3px; padding-right: 8px; padding-bottom: 8px;">
+                                <table class="locked-yellow" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #FFDA0A; background-image: linear-gradient(#FFDA0A, #FFDA0A); border-radius: 14px 9px 16px 8px;">
+                                  <tr>
+                                    <td align="center" style="padding: 16px;">
+                                      <div style="font-family: 'Space Mono', 'Courier New', Courier, monospace; font-weight: 700; font-size: 32px; letter-spacing: 4px; margin: 0; text-transform: uppercase;">
+                                        <span class="locked-black" style="color: #000000; -webkit-text-fill-color: #000000;"><%= otp %></span>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+
+                          <div style="font-family: 'Space Mono', 'Courier New', Courier, monospace; font-weight: 700; font-size: 12px; color: #888888; text-transform: uppercase; letter-spacing: 1px; margin-top: 24px; text-align: center;">
+                            EXPIRES IN 5 MINS
+                          </div>
+
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding-top: 32px;">
+              <div style="font-family: 'Space Mono', 'Courier New', Courier, monospace; font-weight: 700; font-size: 12px; color: #666666; text-transform: uppercase; letter-spacing: 1px;">
+                SYS &middot; DO NOT REPLY
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+  
 </body>
 </html>

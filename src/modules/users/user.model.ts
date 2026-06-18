@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DBModel } from "../common/constants.js";
+import { DBModel } from "../../config/constants.js";
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -69,8 +69,6 @@ const userSchema = new mongoose.Schema({
         }
     }
 })
-
-export type User = mongoose.InferSchemaType<typeof userSchema>
 
 export const UserModel = mongoose.model(DBModel.User, userSchema);
 

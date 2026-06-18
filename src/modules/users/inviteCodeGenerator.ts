@@ -1,4 +1,5 @@
-import { UserModel } from "../models/user.js";
+import { UserModel } from "./user.model.js";
+
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 

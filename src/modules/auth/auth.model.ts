@@ -1,48 +1,40 @@
 import mongoose from "mongoose";
-import { generateOtp } from "./otpGenerator.js";
-import { DBModel, MAX_REGISTRATION_OTP_DIGIT } from "../../config/constants.js";
+import { DBModel } from "../../config/constants.js";
+import type { Timestamps } from "../../shared/types/type.js";
 
-export interface IRegistrationToken {
+interface IRegistrationToken extends Timestamps {
     email: string;
-    otp?: string;
+    otpHash: string;
+    otpRequestedAt: Date;
     retryAttempt: number;
+    errorMessage?: string;
 }
 
-interface IRegistrationTokenMethods {
-    createOtp(): Promise<void>;
-}
-
-type RegistrationTokenModelType = mongoose.Model<IRegistrationToken, {}, IRegistrationTokenMethods>;
-
-const registrationTokenSchema = new mongoose.Schema<IRegistrationToken, RegistrationTokenModelType, IRegistrationTokenMethods>({
+const registrationTokenSchema = new mongoose.Schema<IRegistrationToken>({
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
 
-    otp: {
+    otpHash: {
         type: String
+    },
+
+    otpRequestedAt: {
+        type: Date
     },
 
     retryAttempt: {
         type: Number,
         default: 0
+    },
+
+    errorMessage: {
+        type: String
     }
 }, {
     timestamps: true,
-
-    methods: {
-        async createOtp() {
-            this.otp = generateOtp(true, MAX_REGISTRATION_OTP_DIGIT);
-            await this.save();
-        }
-    },
-
-    statics: {
-        async findByEmail(email: string) {
-            return this.findOne({email});
-        }
-    }
 })
 
-export const RegistrationTokenModel = mongoose.model(DBModel.RegistrationToken, registrationTokenSchema)
+export const RegistrationTokenModel = mongoose.model<IRegistrationToken>(DBModel.RegistrationToken, registrationTokenSchema)
