@@ -1,9 +1,9 @@
-import { RegistrationTokenModel } from "../models/auth.js";
-import { UserModel } from "../models/user.js";
 import ejs from "ejs";
-import { emailService } from "./email.service.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { UserModel } from "../users/user.model.js";
+import { RegistrationTokenModel } from "./auth.model.js";
+import { emailService } from "../../services/email/email.service.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,7 +27,7 @@ class AuthService {
         await regToken.createOtp();
         
         // generate otp template
-        const templatePath = path.join(__dirname, "../template/registrationOtp.ejs");
+        const templatePath = path.join(__dirname, "../../templates/registrationOtp.ejs");
         const otpHtmlTemplate = await ejs.renderFile(templatePath, {
             otp: regToken.otp
         });

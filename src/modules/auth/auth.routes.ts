@@ -1,10 +1,9 @@
 import type { FastifyPluginAsync } from "fastify";
-import { registerUserRequest } from "../types/auth.js";
-import { authService } from "../services/auth.service.js";
-import { generalResponse } from "../types/user.js";
 import { StatusCodes } from "http-status-codes";
-import { createLogger } from "../utils/logger.js";
-import { success } from "zod";
+import { createLogger } from "../../shared/utils/logger.js";
+import { registerUserRequest } from "./auth.schema.js";
+import { generalResponse } from "../users/user.schema.js";
+import { authService } from "./auth.service.js";
 
 const logger = createLogger(import.meta.url);
 

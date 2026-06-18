@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { generateOtp } from "../common/otpGenerator.js";
-import { DBModel, MAX_REGISTRATION_OTP_DIGIT } from "../common/constants.js";
+import { generateOtp } from "./otpGenerator.js";
+import { DBModel, MAX_REGISTRATION_OTP_DIGIT } from "../../config/constants.js";
 
 export interface IRegistrationToken {
     email: string;

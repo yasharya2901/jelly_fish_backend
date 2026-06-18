@@ -1,8 +1,9 @@
 import Fastify from 'fastify';
-import {createLogger} from './utils/logger.js';
-import connectWithDb from './utils/db.js';
-import { initializeEnvironmentVariables } from './utils/env.js';
-import authRoutes from './routes/auth.route.js';
+import { createLogger } from './shared/utils/logger.js';
+import authRoutes from './modules/auth/auth.routes.js';
+import { initializeEnvironmentVariables } from './config/env.js';
+import connectWithDb from './plugins/db.js';
+
 
 const PORT: number = Number(process.env.PORT) || 8000;
 const HOST: string = process.env.HOST ?? "0.0.0.0";
