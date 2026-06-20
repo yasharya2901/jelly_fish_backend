@@ -4,6 +4,8 @@ import authRoutes from './modules/auth/auth.routes.js';
 import { initializeEnvironmentVariables } from './config/env.js';
 import connectWithDb from './plugins/db.js';
 import { AppError } from './shared/errors/AppError.js';
+import z, { success } from 'zod';
+import { StatusCodes } from 'http-status-codes';
 
 
 const PORT: number = Number(process.env.PORT) || 8000;
@@ -20,8 +22,21 @@ fastify.setErrorHandler((error, request, reply) => {
         return reply.code(error.statusCode).send({
             success: false,
             data: error.message
-        })
+        });
     }
+
+    if (error instanceof z.ZodError) {
+        return reply.code(StatusCodes.BAD_REQUEST).send({
+            success: false,
+            data: error.message
+        });
+    }
+
+    request.log.error(error);
+    return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send({
+        success: false,
+        data: "Internal Server Error"
+    })
 })
 
 fastify.register(authRoutes, { prefix: '/api/v0/auth' });

@@ -2,55 +2,29 @@ import { StatusCodes } from "http-status-codes";
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import { registerUserRequest } from "./auth.schema.js";
-import { generalResponse } from "../users/user.schema.js";
 import { authService } from "./auth.service.js";
-import { createLogger } from "../../shared/utils/logger.js";
-
-const logger = createLogger(import.meta.url);
+import type { GeneralResponse } from "../../shared/types/type.js";
 
 async function register(
     request: FastifyRequest,
     reply: FastifyReply
 ) {
-    let requestBody;
+    let requestBody = registerUserRequest.parse(request.body);
 
-    try {
-        requestBody = registerUserRequest.parse(request.body);
-        logger.info(requestBody);
-    } catch (error) {
-        const response = generalResponse.parse({
-            success: false,
-            data: `${error}`,
-        });
+    const registrationToken = await authService.registerUser(
+        requestBody.emailId,
+        requestBody.inviteCode
+    );
 
-        return reply.code(StatusCodes.BAD_REQUEST).send(response);
+    const response: GeneralResponse<{message: string, token: string}> = {
+        success: true,
+        data: {
+            message: "Registration Successful",
+            token: registrationToken,
+        },
     }
 
-    try {
-        const registrationToken = await authService.registerUser(
-            requestBody.emailId,
-            requestBody.inviteCode
-        );
-
-        const response = generalResponse.parse({
-            success: true,
-            data: {
-                message: "Registration Successful",
-                registrationToken,
-            },
-        });
-
-        return reply.code(StatusCodes.CREATED).send(response);
-    } catch (error) {
-        logger.error(`Error registering user: ${error}`);
-
-        const response = generalResponse.parse({
-            success: false,
-            data: "Error during registration",
-        });
-
-        return reply.code(StatusCodes.INTERNAL_SERVER_ERROR).send(response);
-    }
+    return reply.code(StatusCodes.CREATED).send(response);
 }
 
 export const authController = {

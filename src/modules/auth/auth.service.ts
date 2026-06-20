@@ -7,7 +7,7 @@ import { emailService } from "../../services/email/email.service.js";
 import { AppError } from "../../shared/errors/AppError.js";
 import { StatusCodes } from "http-status-codes";
 import { generateOtp } from "./otpGenerator.js";
-import { MAX_REGISTRATION_OTP_DIGIT } from "../../config/constants.js";
+import { MAX_REGISTRATION_OTP_DIGIT, OTP_TTL_MS, RESEND_COOLDOWN_MS } from "../../config/constants.js";
 import { hashOtp } from "./hashOtp.js";
 import { createLogger } from "../../shared/utils/logger.js";
 
@@ -17,61 +17,100 @@ const logger = createLogger(import.meta.url);
 
 class AuthService {
     async registerUser(email: string, inviteCode: string) {
+        email = email.toLowerCase().trim();
+
         // check if email already exists
         const existingUser = await UserModel.findByEmail(email);
         if (existingUser) {
-            throw new AppError("User already exists with the current email.", StatusCodes.CONFLICT);
+            throw new AppError(
+                "User already exists with the current email.", 
+                StatusCodes.CONFLICT
+            );
         }
 
         // find if the invite code belongs to a user
         const referrer = await UserModel.findByInviteCode(inviteCode);
         if (!referrer) {
-            throw new AppError("Invalid Invite Code.", StatusCodes.BAD_REQUEST);
+            throw new AppError(
+                "Invalid Invite Code.", 
+                StatusCodes.BAD_REQUEST
+            );
         }
 
-        // check if the registration token exists for the email
-        let regToken = await RegistrationTokenModel.findOne({email});
         
-        if (regToken) {
-            const now = Date.now();
-            const otpRequestedAt = regToken.otpRequestedAt.getTime();
-
-            const ONE_MIN = 60 * 1_000;
-            if (now - otpRequestedAt < ONE_MIN) {
-                throw new AppError("OTP already sent. Please wait before requesting again.", StatusCodes.TOO_MANY_REQUESTS);
+        // check if the registration token exists for the email
+        let token = await RegistrationTokenModel.findOne({email});
+        const now = Date.now();
+        
+        if (token) {
+            if (token.expiresAt.getTime() < now) {
+                token.status = "EXPIRED";
             }
 
-            regToken.retryAttempt += 1;
+            if (token.status === "EXPIRED") {
+                // reset lifecycle if expired
+                token.resendCount = 0;
+                token.retryAttempt = 0;
+                token.status = "PENDING";
+            }
+
+            // Resend cooldown check
+            if (
+                token.lastSentAt &&
+                now - token.lastSentAt.getTime() < RESEND_COOLDOWN_MS
+            ) {
+                throw new AppError(
+                    "Please wait before requesting another OTP",
+                    StatusCodes.TOO_MANY_REQUESTS
+                );
+            }
+
+            // Resend limit check
+            if (token.resendCount >= token.maxResendCount) {
+                throw new AppError(
+                    "Maximum OTP resend limit reached",
+                    StatusCodes.TOO_MANY_REQUESTS
+                );
+            }
+
+            token.resendCount += 1;
 
         } else {
-            regToken = new RegistrationTokenModel({email: email});
+            token = new RegistrationTokenModel({
+                email,
+                resendCount: 0,
+                retryAttempt: 0,
+                status: "PENDING"
+            });
         }
         
-        const otp = this.createOtp();
-        regToken.otpHash = hashOtp(otp);
-        regToken.otpRequestedAt = new Date();
-        await regToken.save();
+        const otp = generateOtp(false, MAX_REGISTRATION_OTP_DIGIT);
+        const otpHash = hashOtp(otp);
+
+        const nowDate = new Date();
+
+        token.otpHash = otpHash;
+        token.otpRequestedAt = nowDate;
+        token.lastSentAt = nowDate;
+        token.expiresAt = new Date(now + OTP_TTL_MS);
+
+        await token.save();
         
         // generate otp template
         const templatePath = path.join(__dirname, "../../templates/registrationOtp.ejs");
         const otpHtmlTemplate = await ejs.renderFile(templatePath, {
             otp: otp,
-            email: regToken.email
+            email: token.email
         });
-        // TODO: Handle idempotency
 
         // send the email asynchronously so we don't block the response
         emailService.sendEmail(email, "JellyFish - Verify Your Account", otpHtmlTemplate).catch(async (err) => {
-            regToken.errorMessage = err.message;
-            await regToken.save();
+            token.errorMessage = err.message;
+            await token.save();
             logger.error("Failed to send OTP email:", err);
         });
 
-        return regToken._id;
-    }
-
-    private createOtp() {
-        return generateOtp(false, MAX_REGISTRATION_OTP_DIGIT);
+        return token._id.toString();
     }
 }
 
