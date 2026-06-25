@@ -56,3 +56,21 @@ export async function generateInviteCode(username: string, phoneNumber: string |
     } while (await isReserved(code));
     return code;
 }
+
+export async function generateUsernameFromEmail(email: string): Promise<string> {
+    const prefix = email.split("@")[0];
+
+    if (!prefix) {
+        throw new Error("Invalid email address");
+    }
+
+    let username = prefix;
+    let counter = 1;
+
+    while (await UserModel.findByUsername(username)) {
+        username = `${prefix}${counter}`;
+        counter++;
+    }
+
+    return username;
+}

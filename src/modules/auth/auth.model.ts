@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
-import { DBModel } from "../../config/constants.js";
+import { DBModel, MAX_OTP_RETRY_ATTEMPT } from "../../config/constants.js";
 import type { Timestamps } from "../../shared/types/type.js";
 
 interface IRegistrationToken extends Timestamps {
-    email: string
+    target: string
+    type: "EMAIL" | "PHONE"
+    inviteCode: string
     otpHash: string
     otpRequestedAt: Date
     expiresAt: Date
@@ -17,12 +19,21 @@ interface IRegistrationToken extends Timestamps {
 }
 
 const registrationTokenSchema = new mongoose.Schema<IRegistrationToken>({
-    email: {
+    target: {
         type: String,
         required: true,
         unique: true,
         lowercase: true,
         trim: true
+    },
+    type: {
+        type: String,
+        enum: ["EMAIL", "PHONE"],
+        required: true
+    },
+    inviteCode: {
+        type: String,
+        required: true
     },
     otpHash: {
         type: String,
@@ -44,7 +55,7 @@ const registrationTokenSchema = new mongoose.Schema<IRegistrationToken>({
     maxRetryAttempt: {
         type: Number,
         required: true,
-        default: 5
+        default: MAX_OTP_RETRY_ATTEMPT
     },
     resendCount: {
         type: Number,

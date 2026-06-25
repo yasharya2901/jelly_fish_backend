@@ -3,8 +3,7 @@ import { DBModel } from "../../config/constants.js";
 
 const userSchema = new mongoose.Schema({
     name: {
-        type: String,
-        required: true
+        type: String
     },
     phoneNumber: {
         type: String,

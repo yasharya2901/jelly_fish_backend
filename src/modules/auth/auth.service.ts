@@ -10,6 +10,8 @@ import { generateOtp } from "./otpGenerator.js";
 import { MAX_REGISTRATION_OTP_DIGIT, OTP_TTL_MS, RESEND_COOLDOWN_MS } from "../../config/constants.js";
 import { hashOtp } from "./hashOtp.js";
 import { createLogger } from "../../shared/utils/logger.js";
+import { email } from "zod";
+import { generateUsernameFromEmail } from "../users/inviteCodeGenerator.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,7 +41,7 @@ class AuthService {
 
         
         // check if the registration token exists for the email
-        let token = await RegistrationTokenModel.findOne({email});
+        let token = await RegistrationTokenModel.findOne({type: "EMAIL", target: email});
         const now = Date.now();
         
         if (token) {
@@ -73,11 +75,16 @@ class AuthService {
                 );
             }
 
+            if (token.inviteCode !== inviteCode) {
+                token.inviteCode = inviteCode;
+            }
             token.resendCount += 1;
 
         } else {
             token = new RegistrationTokenModel({
-                email,
+                type: "EMAIL",
+                target: email,
+                inviteCode: inviteCode,
                 resendCount: 0,
                 retryAttempt: 0,
                 status: "PENDING"
@@ -100,7 +107,7 @@ class AuthService {
         const templatePath = path.join(__dirname, "../../templates/registrationOtp.ejs");
         const otpHtmlTemplate = await ejs.renderFile(templatePath, {
             otp: otp,
-            email: token.email
+            email: token.target
         });
 
         // send the email asynchronously so we don't block the response
@@ -111,6 +118,71 @@ class AuthService {
         });
 
         return token._id.toString();
+    }
+
+    async verifyOtp(tokenId: string, otp: string) {
+        // get the registration token from the tokenId
+        const token = await RegistrationTokenModel.findById(tokenId);
+        if (!token) {
+            throw new AppError(
+                "Invalid Registration Token",
+                StatusCodes.NOT_FOUND
+            )
+        }
+
+        if (token.status === "EXPIRED") {
+            throw new AppError(
+                "Registration Token has expired. Please request a new OTP.",
+                StatusCodes.BAD_REQUEST
+            )
+        }
+
+        if (token.retryAttempt >= token.maxRetryAttempt) {
+            throw new AppError(
+                "Too many requests. Please try again later.",
+                StatusCodes.TOO_MANY_REQUESTS
+            )
+        }
+
+        const otpHash = hashOtp(otp);
+
+        if (token.otpHash !== otpHash) {
+            token.retryAttempt += 1;
+            await token.save();
+            throw new AppError(
+                "Incorrect Otp",
+                StatusCodes.BAD_REQUEST
+            )
+        }
+
+        // otp match is successful
+        token.status = "VERIFIED"
+
+        let referrer = await UserModel.findByInviteCode(token.inviteCode);
+        
+        if (!referrer) {
+            throw new AppError(
+                "Referrer not found. Please check the invite code.",
+                StatusCodes.NOT_FOUND
+            )
+        }
+
+        let newUserName = await generateUsernameFromEmail(token.target);
+
+        const user = await UserModel.create({
+            emailId: token.target,
+            referredByUserId: referrer._id,
+            emailVerified: true,
+            username: newUserName
+        })
+
+        await token.save();
+
+        return {
+            userId: user._id.toString(),
+            email: user.emailId,
+            username: user.username
+        }
     }
 }
 
