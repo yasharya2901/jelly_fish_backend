@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { DBModel, MAX_OTP_RETRY_ATTEMPT } from "../../config/constants.js";
 import type { Timestamps } from "../../shared/types/type.js";
+import { required } from "zod/mini";
 
 interface IRegistrationToken extends Timestamps {
     target: string
@@ -84,4 +85,44 @@ const registrationTokenSchema = new mongoose.Schema<IRegistrationToken>({
     timestamps: true,
 })
 
+
+const refreshTokenSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: DBModel.User,
+        required: true,
+        index: true,
+    },
+
+    deviceId: {
+        type: String,
+        required: true,
+        index: true,
+    },
+
+    familyId: {
+        type: String,
+        required: true,
+        index: true,
+    },
+
+    tokenHash: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+
+    revokedAt: {
+        type: Date,
+    },
+
+    expiresAt: {
+        type: Date,
+        required: true,
+    }
+}, {
+    timestamps: true,
+})
+
 export const RegistrationTokenModel = mongoose.model<IRegistrationToken>(DBModel.RegistrationToken, registrationTokenSchema)
+export const RefreshTokenModel = mongoose.model(DBModel.RefreshToken, refreshTokenSchema)

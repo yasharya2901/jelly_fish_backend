@@ -2,7 +2,8 @@ export const DBModel = Object.freeze({
     User: "User",
     Friendship: "Friendship",
     FriendRequest: "FriendRequest",
-    RegistrationToken: "RegistrationToken"
+    RegistrationToken: "RegistrationToken",
+    RefreshToken: "RefreshToken",
 });
 
 

@@ -178,6 +178,8 @@ class AuthService {
 
         await token.save();
 
+        // get the access token and refresh token
+
         return {
             userId: user._id.toString(),
             email: user.emailId,
