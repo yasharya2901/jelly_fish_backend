@@ -1,3 +1,5 @@
+import { envVars } from "./env.js";
+
 export const DBModel = Object.freeze({
     User: "User",
     Friendship: "Friendship",
@@ -35,3 +37,10 @@ export const RESEND_COOLDOWN_MS = 60 * 1000;
  * Value = 3 minutes
  */
 export const OTP_TTL_MS = 3 * 60 * 1000;
+
+/**
+ * Time to Live for Refresh Token
+ * 
+ * Value = Days specified in the environment variable REFRESH_TOKEN_EXPIRATION_TIME
+ */
+export const REFRESH_TOKEN_TTL_MS = envVars.REFRESH_TOKEN_EXPIRATION_TIME;

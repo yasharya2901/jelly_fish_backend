@@ -1,12 +1,10 @@
+import { envVars } from "../../config/env.js";
 import { UserModel } from "./user.model.js";
 
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-let reservedList: Record<string, string> | undefined = undefined;
-if (process.env.RESERVED_INVITE_CODE) {
-    reservedList = JSON.parse(process.env.RESERVED_INVITE_CODE) as Record<string, string>;
-}
+let reservedList: Record<string, string> | undefined = envVars.RESERVED_INVITE_CODE;
 
 function generateCode(username: string): string {
     const prefix = username

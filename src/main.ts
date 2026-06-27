@@ -6,6 +6,7 @@ import connectWithDb from './plugins/db.js';
 import { AppError } from './shared/errors/AppError.js';
 import z, { success } from 'zod';
 import { StatusCodes } from 'http-status-codes';
+import { JOSEError, JWEDecryptionFailed, JWTExpired } from 'jose/errors';
 
 
 const PORT: number = Number(process.env.PORT) || 8000;
@@ -27,6 +28,28 @@ fastify.setErrorHandler((error, request, reply) => {
 
     if (error instanceof z.ZodError) {
         return reply.code(StatusCodes.BAD_REQUEST).send({
+            success: false,
+            data: error.message
+        });
+    }
+
+    if (error instanceof JWTExpired) {
+        return reply.code(StatusCodes.UNAUTHORIZED).send({
+            success: false,
+            data: error.message
+        });
+    }
+
+    if (error instanceof JWEDecryptionFailed) {
+        return reply.code(StatusCodes.UNAUTHORIZED).send({
+            success: false,
+            data: "Invalid Token"
+        });
+    }
+
+    if (error instanceof JOSEError) {
+        logger.error(error);
+        return reply.code(StatusCodes.UNAUTHORIZED).send({
             success: false,
             data: error.message
         });

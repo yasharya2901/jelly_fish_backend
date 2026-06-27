@@ -10,6 +10,7 @@ interface IRegistrationToken extends Timestamps {
     otpHash: string
     otpRequestedAt: Date
     expiresAt: Date
+    deviceId?: string
     retryAttempt: number
     maxRetryAttempt: number
     resendCount: number
@@ -43,6 +44,10 @@ const registrationTokenSchema = new mongoose.Schema<IRegistrationToken>({
     otpRequestedAt: {
         type: Date,
         required: true
+    },
+    deviceId: {
+        type: String,
+        required: false
     },
     expiresAt: {
         type: Date,
@@ -96,7 +101,7 @@ const refreshTokenSchema = new mongoose.Schema({
 
     deviceId: {
         type: String,
-        required: true,
+        required: false,
         index: true,
     },
 
@@ -119,6 +124,9 @@ const refreshTokenSchema = new mongoose.Schema({
     expiresAt: {
         type: Date,
         required: true,
+        index: {
+            expires: 0, // This will make MongoDB automatically delete the document when it expires
+        }
     }
 }, {
     timestamps: true,
