@@ -11,9 +11,7 @@ interface EnvVars {
     REFRESH_TOKEN_EXPIRATION_TIME: number; // in milliseconds
 }
 
-export let envVars: EnvVars;
-
-export async function initializeEnvironmentVariables() {
+function parseEnvironmentVariables(): EnvVars {
     const MONGO_URI = process.env.MONGO_URI;
     if (!MONGO_URI) throw new Error("MONGO_URI is required.");
 
@@ -32,7 +30,7 @@ export async function initializeEnvironmentVariables() {
     const ACCESS_TOKEN_EXPIRATION_TIME = process.env.ACCESS_TOKEN_EXPIRATION_TIME;
     if (!ACCESS_TOKEN_EXPIRATION_TIME) throw new Error("ACCESS_TOKEN_EXPIRATION_TIME is required.");
 
-    let REFRESH_TOKEN_EXPIRATION_TIME = process.env.REFRESH_TOKEN_EXPIRATION_TIME;
+    const REFRESH_TOKEN_EXPIRATION_TIME = process.env.REFRESH_TOKEN_EXPIRATION_TIME;
     if (!REFRESH_TOKEN_EXPIRATION_TIME) throw new Error("REFRESH_TOKEN_EXPIRATION_TIME is required.");
 
     const refreshInMillis = ms(REFRESH_TOKEN_EXPIRATION_TIME as StringValue);
@@ -55,7 +53,7 @@ export async function initializeEnvironmentVariables() {
         }
     }
 
-    envVars = {
+    return {
         MONGO_URI,
         EMAIL_USER,
         EMAIL_PASSWORD,
@@ -65,4 +63,11 @@ export async function initializeEnvironmentVariables() {
         RESERVED_INVITE_CODE,
         REFRESH_TOKEN_EXPIRATION_TIME: refreshInMillis,
     };
+}
+
+export let envVars: EnvVars = parseEnvironmentVariables();
+
+export async function initializeEnvironmentVariables() {
+    envVars = parseEnvironmentVariables();
+    return envVars;
 }
