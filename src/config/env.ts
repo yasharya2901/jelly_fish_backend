@@ -9,6 +9,7 @@ interface EnvVars {
     ACCESS_TOKEN_EXPIRATION_TIME: string;
     RESERVED_INVITE_CODE: Record<string, string> | undefined;
     REFRESH_TOKEN_EXPIRATION_TIME: number; // in milliseconds
+    REGISTRATION_WINDOW: number; // in milliseconds
 }
 
 function parseEnvironmentVariables(): EnvVars {
@@ -38,6 +39,12 @@ function parseEnvironmentVariables(): EnvVars {
         throw new Error("REFRESH_TOKEN_EXPIRATION_TIME must be a valid duration string.");
     }
 
+    const REGISTRATION_WINDOW_RAW = process.env.REGISTRATION_WINDOW ?? "1h";
+    const registrationWindowMillis = ms(REGISTRATION_WINDOW_RAW as StringValue);
+    if (!registrationWindowMillis || typeof registrationWindowMillis !== "number") {
+        throw new Error("REGISTRATION_WINDOW must be a valid duration string (e.g. '1h', '30m', '2h').");
+    }
+
 
     let RESERVED_INVITE_CODE: Record<string, string> | undefined;
     const reservedRaw = process.env.RESERVED_INVITE_CODE;
@@ -62,6 +69,7 @@ function parseEnvironmentVariables(): EnvVars {
         ACCESS_TOKEN_EXPIRATION_TIME,
         RESERVED_INVITE_CODE,
         REFRESH_TOKEN_EXPIRATION_TIME: refreshInMillis,
+        REGISTRATION_WINDOW: registrationWindowMillis,
     };
 }
 

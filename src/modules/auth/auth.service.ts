@@ -7,7 +7,7 @@ import { emailService } from "../../services/email/email.service.js";
 import { AppError } from "../../shared/errors/AppError.js";
 import { StatusCodes } from "http-status-codes";
 import { generateOtp } from "./otpGenerator.js";
-import { MAX_REGISTRATION_OTP_DIGIT, OTP_TTL_MS, REFRESH_TOKEN_TTL_MS, RESEND_COOLDOWN_MS } from "../../config/constants.js";
+import { MAX_REGISTRATION_OTP_DIGIT, MAX_REGISTRATION_ATTEMPTS, OTP_TTL_MS, REFRESH_TOKEN_TTL_MS, REGISTRATION_WINDOW_MS, RESEND_COOLDOWN_MS } from "../../config/constants.js";
 import { createLogger } from "../../shared/utils/logger.js";
 import { generateUsernameFromEmail } from "../users/inviteCodeGenerator.js";
 import { generateRefreshToken, getAccessToken, hashString } from "./tokens.js";
@@ -45,15 +45,29 @@ class AuthService {
         const now = Date.now();
         
         if (token) {
+            // prune registration attempts outside the sliding window
+            token.registrationAttempts = token.registrationAttempts.filter(
+                (ts) => ts.getTime() > now - REGISTRATION_WINDOW_MS
+            );
+
             if (token.expiresAt.getTime() < now) {
                 token.status = "EXPIRED";
             }
 
             if (token.status === "EXPIRED") {
+                // sliding window check
+                if (token.registrationAttempts.length >= MAX_REGISTRATION_ATTEMPTS) {
+                    throw new AppError(
+                        "Maximum registration attempts reached. Please try again later.",
+                        StatusCodes.TOO_MANY_REQUESTS
+                    );
+                }
+
                 // reset lifecycle if expired
                 token.resendCount = 0;
                 token.retryAttempt = 0;
                 token.status = "PENDING";
+                token.registrationAttempts.push(new Date(now));
             }
 
             // Resend cooldown check
@@ -79,6 +93,8 @@ class AuthService {
                 token.inviteCode = inviteCode;
             }
             token.resendCount += 1;
+            // reset retry attempts since a new OTP will be generated
+            token.retryAttempt = 0;
 
         } else {
             token = new RegistrationTokenModel({
@@ -87,7 +103,8 @@ class AuthService {
                 inviteCode: inviteCode,
                 resendCount: 0,
                 retryAttempt: 0,
-                status: "PENDING"
+                status: "PENDING",
+                registrationAttempts: [new Date(now)]
             });
         }
 
@@ -243,6 +260,8 @@ class AuthService {
         token.lastSentAt = new Date();
         token.expiresAt = new Date(now + OTP_TTL_MS);
         token.resendCount += 1;
+        // reset retry attempts since a new OTP will be generated
+        token.retryAttempt = 0;
 
         await token.save();
 

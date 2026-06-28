@@ -7,6 +7,7 @@ import { AppError } from './shared/errors/AppError.js';
 import z, { success } from 'zod';
 import { StatusCodes } from 'http-status-codes';
 import { JOSEError, JWEDecryptionFailed, JWTExpired } from 'jose/errors';
+import mongoose from 'mongoose';
 
 
 const PORT: number = Number(process.env.PORT) || 8000;
@@ -52,6 +53,13 @@ fastify.setErrorHandler((error, request, reply) => {
         return reply.code(StatusCodes.UNAUTHORIZED).send({
             success: false,
             data: error.message
+        });
+    }
+
+    if (error instanceof mongoose.Error.CastError) {
+        return reply.code(StatusCodes.BAD_REQUEST).send({
+            success: false,
+            data: "Invalid ID format"
         });
     }
 

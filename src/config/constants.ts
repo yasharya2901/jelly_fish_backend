@@ -39,6 +39,24 @@ export const RESEND_COOLDOWN_MS = 60 * 1000;
 export const OTP_TTL_MS = 3 * 60 * 1000;
 
 /**
+ * Maximum number of registration attempts allowed within the sliding window.
+ * An attempt is counted each time a user starts a new registration cycle
+ * (initial registration or re-registration after OTP expiry).
+ * 
+ * Value = 3
+ */
+export const MAX_REGISTRATION_ATTEMPTS = 3;
+
+/**
+ * Sliding window duration for registration attempts.
+ * Attempts older than this are pruned and no longer count toward the limit.
+ * 
+ * Configurable via REGISTRATION_WINDOW env var (e.g. "1h", "30m", "2h").
+ * Defaults to 1 hour if not set.
+ */
+export const REGISTRATION_WINDOW_MS = envVars.REGISTRATION_WINDOW;
+
+/**
  * Time to Live for Refresh Token
  * 
  * Value = Days specified in the environment variable REFRESH_TOKEN_EXPIRATION_TIME

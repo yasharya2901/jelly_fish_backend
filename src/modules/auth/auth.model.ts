@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DBModel, MAX_OTP_RETRY_ATTEMPT } from "../../config/constants.js";
+import { DBModel, MAX_OTP_RETRY_ATTEMPT, MAX_REGISTRATION_ATTEMPTS } from "../../config/constants.js";
 import type { Timestamps } from "../../shared/types/type.js";
 import { required } from "zod/mini";
 
@@ -15,6 +15,7 @@ interface IRegistrationToken extends Timestamps {
     maxRetryAttempt: number
     resendCount: number
     maxResendCount: number
+    registrationAttempts: Date[]
     lastSentAt: Date
     status: "PENDING" | "VERIFIED" | "EXPIRED"
     errorMessage?: string
@@ -72,6 +73,11 @@ const registrationTokenSchema = new mongoose.Schema<IRegistrationToken>({
         type: Number,
         required: true,
         default: 5
+    },
+    registrationAttempts: {
+        type: [Date],
+        default: [],
+        required: true
     },
     lastSentAt: {
         type: Date,
