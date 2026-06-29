@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DBModel, MAX_OTP_RETRY_ATTEMPT, MAX_REGISTRATION_ATTEMPTS } from "../../config/constants.js";
+import { DBModel, MAX_OTP_RETRY_ATTEMPT } from "../../config/constants.js";
 import type { Timestamps } from "../../shared/types/type.js";
 import { required } from "zod/mini";
 
